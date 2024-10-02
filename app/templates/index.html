@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pothole Detection</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #eaeaea;
+            text-align: center;
+            padding: 50px;
+        }
+        .upload-container {
+            background-color: #000;
+            padding: 50px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+            width: 400px;
+            margin: 50px auto;
+            color: #fff;
+        }
+        h1 {
+            color: #fff;
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+        form {
+            margin: 20px 0;
+        }
+        input[type="file"] {
+            padding: 10px;
+            border: 2px solid #fff;
+            border-radius: 5px;
+            background-color: #333;
+            color: #fff;
+            width: 100%;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+        input[type="submit"] {
+            padding: 12px 20px;
+            background-color: #5cb85c;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        input[type="submit"]:hover {
+            background-color: #4cae4c;
+        }
+        footer {
+            margin-top: 50px;
+            font-size: 12px;
+            color: #333;
+        }
+        body {
+            background: linear-gradient(45deg, #5d0da2, #06295b);
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-container">
+        <h1>Pothole Detection and Severity Estimation</h1>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept="image/*,video/*" required>
+            <br>
+            <input type="submit" value="Upload">
+        </form>
+    </div>
+    <footer>
+        <p>Powered by YOLOv10 for real-time pothole detection</p>
+    </footer>
+</body>
+</html>

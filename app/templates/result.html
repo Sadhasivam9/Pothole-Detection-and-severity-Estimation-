@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detection Result</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0d0c0e;
+            text-align: center;
+        }
+        h1 {
+            color: #e5eaea;
+        }
+        img, video {
+            max-width: 100%;
+            height: auto;
+            margin: 20px 0;
+        }
+        a {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #5cb85c;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        a:hover {
+            background-color: #4cae4c;
+        }
+    </style>
+</head>
+<body>
+    <h1>Detection Result</h1>
+    {% if filename.endswith(('.jpg', '.jpeg', '.png')) %}
+        <img src="{{ url_for('static', filename='results/' + filename) }}" alt="Detection Result">
+    {% elif filename.endswith(('.mp4', '.avi', '.mov')) %}
+        <video width="640" height="480" controls>
+            <!-- Serve video via the new route to avoid access issues -->
+            <source src="{{ url_for('app.serve_video', filename=filename) }}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    {% endif %}
+    <br>
+    <a href="{{ url_for('static', filename='results/' + filename) }}">Download Result</a>
+    <br><br>
+    <a href="{{ url_for('app.index') }}">Go Back</a>
+</body>
+</html>
+
