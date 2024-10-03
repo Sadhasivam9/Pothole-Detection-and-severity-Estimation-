@@ -13,7 +13,7 @@
         h1 {
             color: #e5eaea;
         }
-        img, video {
+        img {
             max-width: 100%;
             height: auto;
             margin: 20px 0;
@@ -33,19 +33,8 @@
 </head>
 <body>
     <h1>Detection Result</h1>
-    {% if filename.endswith(('.jpg', '.jpeg', '.png')) %}
-        <img src="{{ url_for('static', filename='results/' + filename) }}" alt="Detection Result">
-    {% elif filename.endswith(('.mp4', '.avi', '.mov')) %}
-        <video width="640" height="480" controls>
-            <!-- Serve video via the new route to avoid access issues -->
-            <source src="{{ url_for('app.serve_video', filename=filename) }}" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-    {% endif %}
+    <img src="data:image/jpeg;base64,{{ image_data }}" alt="Detection Result">
     <br>
-    <a href="{{ url_for('static', filename='results/' + filename) }}">Download Result</a>
-    <br><br>
     <a href="{{ url_for('app.index') }}">Go Back</a>
 </body>
 </html>
-
