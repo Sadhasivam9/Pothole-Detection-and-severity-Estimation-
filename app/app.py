@@ -1,20 +1,23 @@
-import os
-from flask import Blueprint, render_template, request, redirect, url_for, send_file
-from werkzeug.utils import secure_filename
-import torch
+import io
+import base64
+from flask import Flask, Blueprint, render_template, request, redirect
+from PIL import Image
+import numpy as np
 from ultralytics import YOLO
-import cv2
+import base64
 
-app = Blueprint('app', __name__)
+
+app = Flask(__name__)
+app_blueprint = Blueprint('app', __name__)
 
 # Load your YOLOv10 model
 model = YOLO('models/best.pt')
 
-@app.route('/')
+@app_blueprint.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/upload', methods=['POST'])
+@app_blueprint.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
         return redirect(request.url)
@@ -22,53 +25,24 @@ def upload_file():
     if file.filename == '':
         return redirect(request.url)
     if file:
-        # Secure the filename and save it
-        filename = secure_filename(file.filename)
-        upload_path = os.path.join(app.root_path, 'static', 'uploads', filename)
-        file.save(upload_path)
+        # Open the image file in memory
+        img = Image.open(file.stream)
 
-        # Process the file based on whether it's an image or a video
-        if filename.lower().endswith(('.jpg', '.jpeg', '.png')):
-            # Process image
-            results = model(upload_path)
-            result_image_path = os.path.join(app.root_path, 'static', 'results', 'result_' + filename)
-            results[0].save(result_image_path)
-            return render_template('result.html', filename='result_' + filename)
-        
-        elif filename.lower().endswith(('.mp4', '.avi', '.mov')):
-            # Process video
-            output_path = os.path.join(app.root_path, 'static', 'results', 'result_' + filename.split('.')[0] + '.mp4')
-            process_video(upload_path, output_path)
-            return render_template('result.html', filename='result_' + filename.split('.')[0] + '.mp4')
-        
-        else:
-            return 'Unsupported file format'
+        # Process the image with the YOLO model
+        results = model(img)
 
-def process_video(input_path, output_path):
-    cap = cv2.VideoCapture(input_path)
-    # Use the 'avc1' codec (H.264) for broad browser compatibility
-    fourcc = cv2.VideoWriter_fourcc(*'avc1')  
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
-    
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
-        results = model(frame)  # Run inference on each frame
-        annotated_frame = results[0].plot()  # Annotate the frame
-        out.write(annotated_frame)  # Save the annotated frame
-    
-    cap.release()
-    out.release()
+        # Convert NumPy array from results[0].plot() to PIL Image
+        annotated_frame = results[0].plot()  # Get the annotated NumPy array
+        img_pil = Image.fromarray(annotated_frame)  # Convert to PIL image
 
-@app.route('/download/<filename>')
-def download_file(filename):
-    return send_file(os.path.join(app.root_path, 'static', 'results', filename), as_attachment=True)
+        # Convert the PIL image to bytes and then to base64 for display in HTML
+        img_bytes = io.BytesIO()
+        img_pil.save(img_bytes, format='JPEG')
+        img_bytes = img_bytes.getvalue()
+        encoded_img = base64.b64encode(img_bytes).decode('utf-8')
 
-# Route to serve the video directly
-@app.route('/video/<filename>')
-def serve_video(filename):
-    return send_file(os.path.join(app.root_path, 'static', 'results', filename), mimetype='video/mp4')
+        return render_template('result.html', image_data=encoded_img)
+
+if __name__ == '__main__':
+    app.register_blueprint(app_blueprint)
+    app.run(debug=True, host="0.0.0.0", port=5000)
